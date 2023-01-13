@@ -15,7 +15,6 @@ func CreateTodo(c *gin.Context) {
 		return
 	}
 
-
 	result := initializers.DB.Create(&todo)
 
 	if result.Error != nil {
@@ -39,12 +38,35 @@ func GetTodoById(c *gin.Context) {
 
 	var todo models.Todo
 	if err := initializers.DB.First(&todo, id).First(&todo).Error; err != nil {
-        c.IndentedJSON(http.StatusNotFound, gin.H{"error": "Todo not found"})
-        return
-    }
+		c.IndentedJSON(http.StatusNotFound, gin.H{"error": "Todo not found"})
+		return
+	}
 
 	c.IndentedJSON(http.StatusOK, todo)
 
+}
+
+func UpdateFieldTodo(c *gin.Context) {
+	id := c.Param("id")
+
+	var body models.TodoUpdateReq
+
+	c.Bind(&body)
+
+	var todo models.Todo
+	if err := initializers.DB.First(&todo, id).First(&todo).Error; err != nil {
+		c.IndentedJSON(http.StatusNotFound, gin.H{"error": "Todo not found"})
+		return
+	}
+
+	initializers.DB.Model(&todo).Updates(models.Todo{
+		DueDate: body.DueDate,
+		Title:   body.Title,
+		Body:    body.Body,
+		Done:    body.Done,
+	})
+
+	c.IndentedJSON(http.StatusOK, todo)
 }
 
 func UpdateTodoDone(c *gin.Context) {
@@ -52,12 +74,11 @@ func UpdateTodoDone(c *gin.Context) {
 
 	var todo models.Todo
 	if err := initializers.DB.First(&todo, id).First(&todo).Error; err != nil {
-        c.IndentedJSON(http.StatusNotFound, gin.H{"error": "Todo not found"})
-        return
-    }
+		c.IndentedJSON(http.StatusNotFound, gin.H{"error": "Todo not found"})
+		return
+	}
 
-
-	initializers.DB.Model(&todo).Select("Done").Updates(models.Todo{Done:  !todo.Done})
+	initializers.DB.Model(&todo).Select("Done").Updates(models.Todo{Done: !todo.Done})
 
 	c.IndentedJSON(http.StatusOK, todo)
 
@@ -69,9 +90,5 @@ func DeleteTodoById(c *gin.Context) {
 
 	initializers.DB.Delete(&models.Todo{}, id)
 
-	c.JSON(http.StatusNoContent, gin.H{"message" : "item deleted"})
+	c.JSON(http.StatusNoContent, gin.H{"message": "item deleted"})
 }
-
-
-
-

@@ -18,6 +18,7 @@ func main() {
 	r.GET("/todos", controllers.GetAllTodos)
 	r.GET("/todos/:id", controllers.GetTodoById)
 	r.PATCH("/todos/:id/done", controllers.UpdateTodoDone)
+	r.PATCH("/todos/:id/", controllers.UpdateFieldTodo)
 	r.DELETE("/todos/:id", controllers.DeleteTodoById)
 	r.Run()
 }
