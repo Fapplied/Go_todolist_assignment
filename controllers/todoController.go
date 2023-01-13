@@ -10,15 +10,11 @@ import (
 
 func CreateTodo(c *gin.Context) {
 
-	var body struct {
-		Body    string
-		Title   string
-		DueDate string
+	var todo models.Todo
+	if err := c.BindJSON(&todo); err != nil {
+		return
 	}
 
-	c.Bind(&body)
-
-	todo := models.Todo{Title: body.Title, Body: body.Body, DueDate: body.DueDate}
 
 	result := initializers.DB.Create(&todo)
 
@@ -42,11 +38,10 @@ func GetTodoById(c *gin.Context) {
 	id := c.Param("id")
 
 	var todo models.Todo
-	initializers.DB.First(&todo, id)
-	if todo.ID == 0 {
-		c.IndentedJSON(http.StatusNotFound, gin.H{"message": "Todo with that id not found"})
-		return
-	}
+	if err := initializers.DB.First(&todo, id).First(&todo).Error; err != nil {
+        c.IndentedJSON(http.StatusNotFound, gin.H{"error": "Todo not found"})
+        return
+    }
 
 	c.IndentedJSON(http.StatusOK, todo)
 
@@ -56,8 +51,8 @@ func UpdateTodoDone(c *gin.Context) {
 	id := c.Param("id")
 
 	var todo models.Todo
-	if err := initializers.DB.Where("id = ?", id).First(&todo).Error; err != nil {
-        c.IndentedJSON(404, gin.H{"error": "Todo not found"})
+	if err := initializers.DB.First(&todo, id).First(&todo).Error; err != nil {
+        c.IndentedJSON(http.StatusNotFound, gin.H{"error": "Todo not found"})
         return
     }
 

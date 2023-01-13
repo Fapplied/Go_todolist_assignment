@@ -4,8 +4,8 @@ import "gorm.io/gorm"
 
 type Todo struct {
 	gorm.Model
-	Title string 
-	Body string 
-	DueDate string 
+	Title string `json: "title"`
+	Body string `json: "body"`
+	DueDate string `json: "duedate"`
 	Done bool
 }
